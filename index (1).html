@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Studiotriz — Arquitetura & Design de Interiores</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink:    #141210;
+      --ink2:   #1c1917;
+      --ink3:   #252119;
+      --sand:   #F2EDE4;
+      --sand2:  #E8E0D3;
+      --warm:   #D4B896;
+      --accent: #B8966A;
+      --gold:   #C9A86C;
+      --muted:  #8C7E6E;
+      --dim:    #5C5248;
+      --white:  #FDFAF6;
+      --serif:  'Playfair Display', Georgia, serif;
+      --sans:   'DM Sans', sans-serif;
+      --mono:   'DM Mono', monospace;
+      --ease:   cubic-bezier(.25,.46,.45,.94);
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--ink); color: var(--sand); font-family: var(--sans); overflow-x: hidden; cursor: none; }
+
+    /* CURSOR */
+    #c1 { position:fixed;top:0;left:0;z-index:9999;width:8px;height:8px;background:var(--gold);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);transition:width .15s,height .15s; }
+    #c2 { position:fixed;top:0;left:0;z-index:9998;width:36px;height:36px;border:1px solid rgba(201,168,108,.4);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%); }
+    @media(max-width:768px){#c1,#c2{display:none}body{cursor:auto}}
+
+    /* NAV */
+    nav { position:fixed;top:0;left:0;right:0;z-index:100;padding:1.5rem 3.5rem;display:flex;align-items:center;justify-content:space-between;transition:background .5s,padding .4s; }
+    nav.stuck { background:rgba(20,18,16,.94);backdrop-filter:blur(16px);padding:1rem 3.5rem;border-bottom:1px solid rgba(201,168,108,.08); }
+    .logo { display:flex;align-items:center;gap:12px;text-decoration:none; }
+    .logo-mark { width:40px;height:40px;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center; }
+    .logo-mark span { font-family:var(--serif);font-size:22px;font-weight:500;color:var(--gold);line-height:1; }
+    .logo-name { font-size:11px;font-weight:500;letter-spacing:.32em;text-transform:uppercase;color:var(--sand); }
+    .nav-links { display:flex;gap:2.8rem;list-style:none; }
+    .nav-links a { font-size:11px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .25s; }
+    .nav-links a:hover { color:var(--gold); }
+    .nav-cta { font-size:10px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--ink);background:var(--gold);padding:10px 22px;text-decoration:none;transition:background .25s,transform .2s; }
+    .nav-cta:hover { background:var(--warm);transform:translateY(-1px); }
+    @media(max-width:900px){ nav{padding:1.2rem 1.4rem;} nav.stuck{padding:.9rem 1.4rem;} .nav-links,.nav-cta{display:none;} }
+
+    /* HERO */
+    #inicio { height:100vh;min-height:640px;position:relative;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;align-items:end; }
+    .hero-left { padding:0 3.5rem 6rem;position:relative;z-index:2; }
+    .hero-eyebrow { display:flex;align-items:center;gap:1rem;margin-bottom:2rem; }
+    .hero-eyebrow-line { width:32px;height:1px;background:var(--gold); }
+    .hero-eyebrow span { font-family:var(--mono);font-size:10px;font-weight:300;letter-spacing:.3em;text-transform:uppercase;color:var(--gold); }
+    h1 { font-family:var(--serif);font-size:clamp(48px,6.5vw,88px);font-weight:400;line-height:1.05;color:var(--white);margin-bottom:1.8rem; }
+    h1 em { font-style:italic;color:var(--warm); }
+    .hero-sub { font-size:14px;font-weight:300;line-height:1.9;color:var(--muted);max-width:400px;margin-bottom:2.8rem; }
+    .hero-actions { display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap; }
+    .btn-primary { background:var(--gold);color:var(--ink);font-size:10px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;padding:14px 32px;text-decoration:none;transition:background .25s,transform .2s;display:inline-block; }
+    .btn-primary:hover { background:var(--warm);transform:translateY(-2px); }
+    .btn-ghost { color:var(--sand2);text-decoration:none;font-size:10px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;display:flex;align-items:center;gap:8px;transition:color .25s; }
+    .btn-ghost span { transition:transform .3s; }
+    .btn-ghost:hover { color:var(--gold); }
+    .btn-ghost:hover span { transform:translateX(4px); }
+    .hero-right { position:relative;height:100%;display:flex;align-items:stretch; }
+    .hero-img-wrap { position:absolute;inset:0;background:var(--ink3);overflow:hidden; }
+    .hero-img-wrap::after { content:'';position:absolute;inset:0;background:linear-gradient(to right,var(--ink) 0%,transparent 30%),linear-gradient(to top,var(--ink) 0%,transparent 40%); }
+    .hero-placeholder { width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e1b16 0%,#2a261f 50%,#1a1710 100%); }
+    .hero-placeholder-glyph { font-family:var(--serif);font-size:28vw;font-weight:400;color:rgba(201,168,108,.06);line-height:1;user-select:none; }
+    .hero-stats { position:absolute;bottom:4rem;right:3rem;z-index:3;display:flex;flex-direction:column;gap:1.6rem; }
+    .stat { text-align:right; }
+    .stat-num { font-family:var(--serif);font-size:36px;font-weight:400;color:var(--white);line-height:1;display:block; }
+    .stat-lbl { font-size:9px;font-weight:400;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);display:block;margin-top:3px; }
+    .hero-scroll { position:absolute;bottom:5.5rem;left:3.5rem;z-index:3;display:flex;align-items:center;gap:.8rem;font-family:var(--mono);font-size:9px;letter-spacing:.25em;color:rgba(140,126,110,.4);text-transform:uppercase; }
+    .hero-scroll-bar { width:1px;height:48px;background:linear-gradient(to bottom,var(--gold),transparent);animation:pulse 2.2s ease infinite; }
+    @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+    @media(max-width:900px){ #inicio{grid-template-columns:1fr;} .hero-right{display:none;} .hero-left{padding:0 1.4rem 5rem;} }
+
+    /* TICKER */
+    .ticker { overflow:hidden;border-top:1px solid rgba(201,168,108,.1);border-bottom:1px solid rgba(201,168,108,.1);background:var(--ink2);padding:.65rem 0; }
+    .ticker-inner { display:flex;gap:2.8rem;white-space:nowrap;animation:tick 28s linear infinite; }
+    .ticker-inner:hover { animation-play-state:paused; }
+    @keyframes tick{to{transform:translateX(-50%)}}
+    .ticker-item { display:flex;align-items:center;gap:1.4rem;flex-shrink:0;font-family:var(--mono);font-size:10px;font-weight:300;letter-spacing:.28em;text-transform:uppercase;color:rgba(201,168,108,.3); }
+    .ticker-dot { width:3px;height:3px;background:var(--gold);border-radius:50%;opacity:.4; }
+
+    /* SECTIONS */
+    section { padding:6rem 3.5rem; }
+    .label { display:flex;align-items:center;gap:.9rem;margin-bottom:1rem; }
+    .label-line { width:20px;height:1px;background:var(--gold); }
+    .label span { font-family:var(--mono);font-size:9px;font-weight:300;letter-spacing:.32em;text-transform:uppercase;color:var(--gold); }
+    h2 { font-family:var(--serif);font-size:clamp(32px,4.5vw,54px);font-weight:400;line-height:1.1;color:var(--white); }
+    h2 em { font-style:italic;color:var(--warm); }
+    @media(max-width:768px){section{padding:4rem 1.4rem;}}
+
+    /* SOBRE */
+    #sobre { background:var(--ink2);overflow:hidden;position:relative; }
+    #sobre::before { content:'T';position:absolute;right:-2rem;top:50%;transform:translateY(-50%);font-family:var(--serif);font-size:40vw;font-weight:400;line-height:1;color:rgba(201,168,108,.025);pointer-events:none;user-select:none; }
+    .sobre-wrap { display:grid;grid-template-columns:5fr 6fr;gap:7rem;align-items:center; }
+    .sobre-visual { position:relative; }
+    .sobre-frame { aspect-ratio:3/4;background:linear-gradient(135deg,#221f18,#2e2a20);overflow:hidden;position:relative; }
+    .sobre-frame-ph { width:100%;height:100%;min-height:440px;display:flex;align-items:center;justify-content:center; }
+    .sobre-frame-ph span { font-family:var(--serif);font-size:180px;font-weight:400;color:rgba(201,168,108,.07); }
+    .sobre-frame::after { content:'';position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(to top,rgba(0,0,0,.75),transparent); }
+    .sobre-caption { position:absolute;bottom:0;left:0;right:0;padding:2rem;z-index:2; }
+    .sobre-caption q { font-family:var(--serif);font-size:18px;font-style:italic;font-weight:400;line-height:1.5;color:var(--warm);quotes:none; }
+    .sobre-deco { position:absolute;top:1.4rem;left:1.4rem;right:-1.4rem;bottom:-1.4rem;border:1px solid rgba(201,168,108,.1);z-index:-1; }
+    .sobre-content h2 { margin-bottom:1.6rem; }
+    .sobre-content p { font-size:14px;font-weight:300;line-height:1.95;color:rgba(242,237,228,.55);margin-bottom:1.3rem; }
+    .sobre-content p strong { color:var(--sand);font-weight:500; }
+    .sobre-grid { display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(201,168,108,.07);margin-top:2.8rem; }
+    .sobre-val { background:var(--ink2);padding:1.4rem 1.5rem;transition:background .3s; }
+    .sobre-val:hover { background:rgba(201,168,108,.04); }
+    .sobre-val-n { font-family:var(--serif);font-size:26px;font-weight:400;color:rgba(201,168,108,.25);display:block;margin-bottom:.5rem; }
+    .sobre-val-t { font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--sand);margin-bottom:.35rem; }
+    .sobre-val-d { font-size:12px;font-weight:300;color:var(--dim);line-height:1.65; }
+    @media(max-width:900px){.sobre-wrap{grid-template-columns:1fr;gap:3rem;}}
+
+    /* SERVIÇOS */
+    #servicos { background:var(--ink); }
+    .srv-top { display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;flex-wrap:wrap;margin-bottom:3.5rem; }
+    .srv-top-desc { font-size:13px;font-weight:300;line-height:1.85;color:var(--muted);max-width:360px; }
+    .srv-cards { display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(201,168,108,.08); }
+    .srv-card { background:var(--ink);padding:2.8rem 2.4rem;position:relative;overflow:hidden;transition:background .3s; }
+    .srv-card:hover { background:var(--ink2); }
+    .srv-card::after { content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .45s var(--ease); }
+    .srv-card:hover::after { transform:scaleX(1); }
+    .srv-n { font-family:var(--serif);font-size:56px;font-weight:400;color:rgba(201,168,108,.1);line-height:1;margin-bottom:1.6rem;display:block; }
+    .srv-title { font-family:var(--serif);font-size:26px;font-weight:400;color:var(--white);margin-bottom:.7rem; }
+    .srv-body { font-size:13px;font-weight:300;color:var(--muted);line-height:1.8;margin-bottom:2rem; }
+    .srv-list { list-style:none; }
+    .srv-list li { font-size:12px;font-weight:300;color:rgba(242,237,228,.38);padding:.3rem 0;border-bottom:1px solid rgba(201,168,108,.06);display:flex;align-items:center;gap:.7rem; }
+    .srv-list li::before { content:'';width:3px;height:3px;background:var(--gold);border-radius:50%;opacity:.5;flex-shrink:0; }
+    .srv-cta { display:inline-flex;align-items:center;gap:.7rem;margin-top:1.8rem;font-family:var(--mono);font-size:9px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);text-decoration:none;transition:gap .3s; }
+    .srv-cta:hover { gap:1.2rem; }
+    @media(max-width:768px){.srv-cards{grid-template-columns:1fr;}}
+
+    /* PORTFOLIO */
+    #portfolio { background:var(--ink2); }
+    .port-top { display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;flex-wrap:wrap;margin-bottom:3rem; }
+    .filters { display:flex;gap:.4rem;flex-wrap:wrap; }
+    .filter { font-family:var(--mono);font-size:9px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;padding:8px 18px;border:1px solid rgba(201,168,108,.14);background:transparent;color:var(--dim);cursor:none;transition:all .25s; }
+    .filter.on,.filter:hover { background:var(--gold);border-color:var(--gold);color:var(--ink); }
+    .port-grid { columns:3;gap:4px; }
+    .port-item { break-inside:avoid;position:relative;overflow:hidden;cursor:none;margin-bottom:4px;background:var(--ink3); }
+    .port-item img { display:block;width:100%;transition:transform .65s var(--ease); }
+    .port-item:hover img { transform:scale(1.06); }
+    .port-ph { width:100%;padding-top:75%;position:relative;background:linear-gradient(135deg,#1e1c16,#252219); }
+    .port-ph-inner { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px; }
+    .port-ph-icon { font-family:var(--serif);font-size:36px;color:rgba(201,168,108,.15); }
+    .port-ph-lbl { font-family:var(--mono);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:rgba(201,168,108,.18); }
+    .port-item.tall .port-ph { padding-top:140%; }
+    .port-overlay { position:absolute;inset:0;background:linear-gradient(to top,rgba(10,8,5,.85) 0%,transparent 50%);opacity:0;transition:opacity .35s;display:flex;flex-direction:column;justify-content:flex-end;padding:1.2rem 1.4rem; }
+    .port-item:hover .port-overlay { opacity:1; }
+    .port-cat { font-family:var(--mono);font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:3px; }
+    .port-name { font-family:var(--serif);font-size:18px;font-weight:400;color:var(--white);line-height:1.2; }
+    .port-loc { font-size:10px;color:rgba(242,237,228,.45);margin-top:3px; }
+
+    /* 360 BADGE */
+    .badge-360 { position:absolute;top:.7rem;right:.7rem;z-index:3;background:var(--gold);color:var(--ink);font-family:var(--mono);font-size:8px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;padding:4px 10px;display:flex;align-items:center;gap:5px;opacity:0;transition:opacity .3s;pointer-events:none; }
+    .port-item:hover .badge-360 { opacity:1; }
+    .badge-360-dot { width:5px;height:5px;background:var(--ink);border-radius:50%;animation:pulse 1.5s ease infinite; }
+    /* always-visible smaller badge (for items that have 360) */
+    .has-360 .badge-360 { opacity:.75; }
+    .has-360:hover .badge-360 { opacity:1; }
+
+    @media(max-width:900px){.port-grid{columns:2;}}
+    @media(max-width:480px){.port-grid{columns:1;}}
+
+    /* BAND */
+    .band { background:linear-gradient(100deg,#1c1811 0%,#141210 100%);border-top:1px solid rgba(201,168,108,.1);border-bottom:1px solid rgba(201,168,108,.1);padding:4rem 3.5rem;display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap; }
+    .band h3 { font-family:var(--serif);font-size:clamp(26px,3.5vw,44px);font-weight:400;line-height:1.2;color:var(--white); }
+    .band h3 em { font-style:italic;color:var(--warm); }
+    .band p { font-size:13px;font-weight:300;color:var(--muted);margin-top:.5rem; }
+    @media(max-width:768px){.band{padding:3rem 1.4rem;}}
+
+    /* MÍDIA */
+    #midia { background:var(--ink); }
+    .midia-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(201,168,108,.07);margin-top:3rem; }
+    .midia-card { background:var(--ink);padding:2.4rem 2rem;border-top:2px solid transparent;transition:border-color .3s,background .3s; }
+    .midia-card:hover { border-top-color:var(--gold);background:var(--ink2); }
+    .midia-src { font-family:var(--mono);font-size:9px;font-weight:300;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem; }
+    .midia-title { font-family:var(--serif);font-size:21px;font-weight:400;color:var(--white);line-height:1.35;margin-bottom:.7rem; }
+    .midia-body { font-size:12px;font-weight:300;color:var(--muted);line-height:1.75; }
+    .midia-link { display:inline-flex;align-items:center;gap:.6rem;margin-top:1.4rem;font-family:var(--mono);font-size:9px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);text-decoration:none;transition:gap .3s; }
+    .midia-link:hover { gap:1.1rem; }
+    @media(max-width:768px){.midia-grid{grid-template-columns:1fr;}}
+
+    /* CONTATO */
+    #contato { background:var(--ink2); }
+    .cont-wrap { display:grid;grid-template-columns:1fr 1.1fr;gap:6rem;align-items:start; }
+    .cont-left>p { font-size:14px;font-weight:300;line-height:1.9;color:var(--muted);margin-top:1.4rem;max-width:340px; }
+    .cont-channels { margin-top:2.6rem;display:flex;flex-direction:column;gap:.6rem; }
+    .cont-ch { display:flex;align-items:center;gap:1.4rem;text-decoration:none;padding:1rem 1.2rem;border:1px solid rgba(201,168,108,.08);position:relative;overflow:hidden;transition:border-color .3s,background .3s; }
+    .cont-ch::before { content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold);transform:scaleY(0);transition:transform .3s; }
+    .cont-ch:hover { border-color:rgba(201,168,108,.25);background:rgba(201,168,108,.03); }
+    .cont-ch:hover::before { transform:scaleY(1); }
+    .cont-ch-icon { width:36px;height:36px;border:1px solid rgba(201,168,108,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .cont-ch-icon svg { width:16px;height:16px;fill:var(--gold); }
+    .cont-ch-label { font-family:var(--mono);font-size:8px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:2px; }
+    .cont-ch-val { font-size:13px;font-weight:400;color:var(--sand); }
+    .cont-ch-arr { margin-left:auto;color:var(--gold);opacity:0;transform:translateX(-6px);transition:opacity .3s,transform .3s; }
+    .cont-ch:hover .cont-ch-arr { opacity:1;transform:translateX(0); }
+    .cont-form { background:var(--ink);border:1px solid rgba(201,168,108,.08);padding:2.8rem; }
+    .cf-heading { font-family:var(--serif);font-size:26px;font-weight:400;color:var(--white);margin-bottom:2rem; }
+    .fg { margin-bottom:1.2rem; }
+    .fg label { display:block;font-family:var(--mono);font-size:8px;font-weight:300;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:6px; }
+    .fg input,.fg select,.fg textarea { width:100%;background:rgba(255,255,255,.025);border:1px solid rgba(201,168,108,.1);color:var(--sand);font-family:var(--sans);font-size:14px;font-weight:300;padding:11px 14px;transition:border-color .3s;outline:none;appearance:none; }
+    .fg input::placeholder,.fg textarea::placeholder { color:rgba(242,237,228,.15); }
+    .fg input:focus,.fg select:focus,.fg textarea:focus { border-color:var(--gold); }
+    .fg textarea { resize:vertical;min-height:110px; }
+    .fg select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C9A86C' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;cursor:pointer; }
+    .fg select option { background:#1c1917; }
+    .fg-row { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
+    .cf-submit { width:100%;background:var(--gold);border:none;color:var(--ink);font-family:var(--sans);font-size:10px;font-weight:500;letter-spacing:.25em;text-transform:uppercase;padding:15px;cursor:none;transition:background .25s,transform .2s;margin-top:.4rem; }
+    .cf-submit:hover { background:var(--warm);transform:translateY(-1px); }
+    @media(max-width:900px){.cont-wrap{grid-template-columns:1fr;gap:3rem;}.fg-row{grid-template-columns:1fr;}}
+
+    /* FOOTER */
+    footer { padding:2.2rem 3.5rem;border-top:1px solid rgba(201,168,108,.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.4rem; }
+    .f-copy { font-family:var(--mono);font-size:10px;font-weight:300;letter-spacing:.08em;color:rgba(140,126,110,.35); }
+    .f-socials { display:flex;gap:.5rem; }
+    .f-socials a { width:32px;height:32px;border:1px solid rgba(201,168,108,.1);display:flex;align-items:center;justify-content:center;text-decoration:none;transition:border-color .3s,background .3s; }
+    .f-socials a:hover { border-color:var(--gold);background:rgba(201,168,108,.07); }
+    .f-socials svg { width:14px;height:14px;fill:var(--gold); }
+    @media(max-width:768px){footer{padding:1.8rem 1.4rem;flex-direction:column;align-items:flex-start;}}
+
+    /* ── LIGHTBOX (fotos normais) ── */
+    #lb { position:fixed;inset:0;z-index:500;background:rgba(10,8,6,.97);display:none;flex-direction:column;align-items:center;justify-content:center; }
+    #lb.open { display:flex; }
+    .lb-close { position:absolute;top:1.5rem;right:2rem;width:44px;height:44px;border:1px solid rgba(255,255,255,.15);background:transparent;color:var(--sand2);font-size:20px;cursor:none;display:flex;align-items:center;justify-content:center;transition:border-color .25s; }
+    .lb-close:hover { border-color:var(--gold); }
+    .lb-content { max-width:90vw;max-height:80vh;display:flex;align-items:center;justify-content:center; }
+    .lb-content img { max-width:100%;max-height:80vh;object-fit:contain; }
+    .lb-ph { width:70vw;max-width:800px;aspect-ratio:16/9;background:var(--ink3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem; }
+    .lb-ph-icon { font-family:var(--serif);font-size:80px;color:rgba(201,168,108,.18); }
+    .lb-ph-title { font-family:var(--serif);font-size:30px;font-weight:400;color:var(--white); }
+    .lb-ph-sub { font-family:var(--mono);font-size:10px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;color:var(--muted); }
+    .lb-meta { position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);text-align:center;white-space:nowrap; }
+    .lb-meta-cat { font-family:var(--mono);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:4px; }
+    .lb-meta-name { font-family:var(--serif);font-size:24px;font-weight:400;color:var(--white); }
+    .lb-nav { position:absolute;top:50%;transform:translateY(-50%);display:flex;justify-content:space-between;left:2rem;right:2rem;pointer-events:none; }
+    .lb-prev,.lb-next { pointer-events:all;width:44px;height:44px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.5);color:var(--sand);font-size:18px;cursor:none;display:flex;align-items:center;justify-content:center;transition:border-color .25s,background .25s; }
+    .lb-prev:hover,.lb-next:hover { border-color:var(--gold);background:rgba(201,168,108,.1); }
+    /* 360 button inside lightbox */
+    .lb-360-btn { position:absolute;bottom:2.5rem;right:2rem;background:var(--gold);color:var(--ink);font-family:var(--mono);font-size:9px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;padding:9px 18px;border:none;cursor:none;display:flex;align-items:center;gap:7px;transition:background .25s;display:none; }
+    .lb-360-btn.show { display:flex; }
+    .lb-360-btn:hover { background:var(--warm); }
+    .lb-360-dot { width:6px;height:6px;background:var(--ink);border-radius:50%;animation:pulse 1.5s ease infinite; }
+
+    /* ── MODAL 360° ── */
+    #modal360 { position:fixed;inset:0;z-index:600;background:rgba(8,6,4,.98);display:none;flex-direction:column; }
+    #modal360.open { display:flex; }
+    .m360-head { position:absolute;top:0;left:0;right:0;padding:1.4rem 2.5rem;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(0,0,0,.7),transparent);z-index:10; }
+    .m360-title { font-family:var(--serif);font-size:20px;font-weight:400;color:var(--white); }
+    .m360-sub { font-family:var(--mono);font-size:9px;font-weight:300;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-top:3px; }
+    .m360-close { width:42px;height:42px;border:1px solid rgba(255,255,255,.15);background:transparent;color:var(--sand);font-size:18px;cursor:none;display:flex;align-items:center;justify-content:center;transition:border-color .25s; }
+    .m360-close:hover { border-color:var(--gold); }
+    #pnlViewer { width:100vw;height:100vh; }
+    .m360-hint { position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;font-weight:300;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.2);pointer-events:none; }
+    /* placeholder quando a imagem 360 ainda não foi adicionada */
+    .ph360 { width:100%;height:100%;background:radial-gradient(ellipse at center,#1c1a14 0%,#0a0806 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.4rem;text-align:center;padding:2rem; }
+    .ph360-icon { font-family:var(--serif);font-size:72px;color:rgba(201,168,108,.25);line-height:1; }
+    .ph360-title { font-family:var(--serif);font-size:28px;font-weight:400;color:var(--white); }
+    .ph360-desc { font-size:13px;font-weight:300;color:var(--muted);line-height:1.85;max-width:480px; }
+    .ph360-steps { display:flex;gap:2.5rem;margin-top:.5rem;flex-wrap:wrap;justify-content:center; }
+    .ph360-step { text-align:center; }
+    .ph360-sn { font-family:var(--serif);font-size:28px;color:rgba(201,168,108,.4);display:block; }
+    .ph360-sl { font-family:var(--mono);font-size:9px;font-weight:300;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);display:block;margin-top:3px; }
+    .ph360-code { display:inline-block;background:rgba(201,168,108,.07);border:1px solid rgba(201,168,108,.15);padding:.6rem 1.4rem;margin-top:.8rem;font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:.05em; }
+
+    /* REVEAL */
+    .rv { opacity:0;transform:translateY(24px);transition:opacity .9s var(--ease),transform .9s var(--ease); }
+    .rv-l { opacity:0;transform:translateX(-24px);transition:opacity .9s var(--ease),transform .9s var(--ease); }
+    .rv.in,.rv-l.in { opacity:1;transform:translate(0); }
+  </style>
+</head>
+<body>
+
+<div id="c1"></div>
+<div id="c2"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#inicio" class="logo">
+    <div class="logo-mark"><span>T</span></div>
+    <span class="logo-name">Studiotriz</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#sobre">Sobre</a></li>
+    <li><a href="#servicos">Serviços</a></li>
+    <li><a href="#portfolio">Portfólio</a></li>
+    <li><a href="#midia">Mídia</a></li>
+    <li><a href="#contato">Contato</a></li>
+  </ul>
+  <a href="#contato" class="nav-cta">Fale Conosco</a>
+</nav>
+
+<!-- HERO -->
+<section id="inicio">
+  <div class="hero-left">
+    <div class="hero-eyebrow rv">
+      <div class="hero-eyebrow-line"></div>
+      <span>Arquitetura & Design de Interiores</span>
+    </div>
+    <h1 class="rv" style="transition-delay:.08s">Espaços que<br><em>narram</em><br>histórias.</h1>
+    <p class="hero-sub rv" style="transition-delay:.16s">Criamos ambientes que vão além do funcional — onde cada detalhe, luz e material transformam quem os habita.</p>
+    <div class="hero-actions rv" style="transition-delay:.24s">
+      <a href="#portfolio" class="btn-primary">Ver Projetos</a>
+      <a href="#contato" class="btn-ghost">Iniciar projeto <span>→</span></a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-img-wrap">
+      <!-- SUBSTITUA POR: <img src="./img/hero.jpg" alt="Projeto em destaque"> -->
+      <div class="hero-placeholder"><span class="hero-placeholder-glyph">T</span></div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat rv" style="transition-delay:.3s"><span class="stat-num">80+</span><span class="stat-lbl">Projetos entregues</span></div>
+      <div class="stat rv" style="transition-delay:.38s"><span class="stat-num">5★</span><span class="stat-lbl">Avaliação média</span></div>
+      <div class="stat rv" style="transition-delay:.46s"><span class="stat-num">BR</span><span class="stat-lbl">Atendimento online</span></div>
+    </div>
+  </div>
+  <div class="hero-scroll"><div class="hero-scroll-bar"></div>Scroll</div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker"><div class="ticker-inner" id="ticker"></div></div>
+
+<!-- SOBRE -->
+<section id="sobre">
+  <div class="sobre-wrap">
+    <div class="sobre-visual rv-l">
+      <div class="sobre-frame">
+        <!-- SUBSTITUA POR: <img src="./img/foto-arquiteta.jpg" alt="Arquiteta"> -->
+        <div class="sobre-frame-ph"><span>T</span></div>
+        <div class="sobre-caption"><q>Arquitetura é espaço<br>transformado em emoção.</q></div>
+      </div>
+      <div class="sobre-deco"></div>
+    </div>
+    <div class="sobre-content rv" style="transition-delay:.1s">
+      <div class="label"><div class="label-line"></div><span>Sobre o Studio</span></div>
+      <h2 style="margin-bottom:1.6rem">Criamos com<br><em>intenção</em>.</h2>
+      <p>O Studiotriz nasce da crença de que todo espaço tem o potencial de transformar quem o habita. Com visão contemporânea e apurado senso estético, desenvolvemos projetos que equilibram <strong>forma, função e emoção</strong>.</p>
+      <p>Cada projeto é tratado como obra única — do primeiro croqui à entrega final, com atenção total aos materiais, à luz e às necessidades reais de cada cliente.</p>
+      <p>Atendemos em todo o Brasil e no exterior. Se você não é de São Paulo, fique tranquilo — trabalhamos <strong>100% online</strong> com a mesma dedicação.</p>
+      <div class="sobre-grid">
+        <div class="sobre-val"><span class="sobre-val-n">01</span><div class="sobre-val-t">Conceito</div><div class="sobre-val-d">Uma ideia central que guia cada decisão do projeto.</div></div>
+        <div class="sobre-val"><span class="sobre-val-n">02</span><div class="sobre-val-t">Precisão</div><div class="sobre-val-d">Detalhes técnicos com rigor e qualidade construtiva.</div></div>
+        <div class="sobre-val"><span class="sobre-val-n">03</span><div class="sobre-val-t">Imersão</div><div class="sobre-val-d">Tours 360° para visualizar o projeto antes da obra.</div></div>
+        <div class="sobre-val"><span class="sobre-val-n">04</span><div class="sobre-val-t">Entrega</div><div class="sobre-val-d">Prazos cumpridos e resultados que superam expectativas.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVIÇOS -->
+<section id="servicos">
+  <div class="srv-top rv">
+    <div>
+      <div class="label"><div class="label-line"></div><span>Serviços</span></div>
+      <h2>O que <em>oferecemos</em></h2>
+    </div>
+    <p class="srv-top-desc">Projetos personalizados e pensados em cada necessidade, gosto e desejo de quem irá curtir aquele espaço.</p>
+  </div>
+  <div class="srv-cards rv" style="transition-delay:.1s">
+    <div class="srv-card">
+      <span class="srv-n">01</span>
+      <div class="srv-title">Projeto Básico</div>
+      <p class="srv-body">Ideal para quem precisa de direcionamento antes de começar. Entregas essenciais para guiar a reforma com segurança.</p>
+      <ul class="srv-list"><li>Planta de layout</li><li>Moodboard de estilo</li><li>Paleta de materiais</li><li>Referências de mobiliário</li></ul>
+      <a href="#contato" class="srv-cta">Saiba mais →</a>
+    </div>
+    <div class="srv-card">
+      <span class="srv-n">02</span>
+      <div class="srv-title">Projeto Completo</div>
+      <p class="srv-body">Do conceito à execução. Todos os detalhes técnicos, especificações e acompanhamento para uma obra sem surpresas.</p>
+      <ul class="srv-list"><li>Tudo do Projeto Básico</li><li>Projeto técnico detalhado</li><li>Renderizações 3D realistas</li><li>Tour virtual 360°</li><li>Acompanhamento de obra</li></ul>
+      <a href="#contato" class="srv-cta">Saiba mais →</a>
+    </div>
+    <div class="srv-card">
+      <span class="srv-n">03</span>
+      <div class="srv-title">Consultoria Online</div>
+      <p class="srv-body">Para quem está em outra cidade ou quer orientação sem contratar projeto completo. Sessões objetivas, resultado prático.</p>
+      <ul class="srv-list"><li>Análise do espaço atual</li><li>Orientação de layout</li><li>Indicação de fornecedores</li><li>Atendimento por vídeo</li></ul>
+      <a href="#contato" class="srv-cta">Saiba mais →</a>
+    </div>
+  </div>
+</section>
+
+<!-- PORTFOLIO -->
+<section id="portfolio">
+  <div class="port-top rv">
+    <div>
+      <div class="label"><div class="label-line"></div><span>Portfólio</span></div>
+      <h2>Nossos <em>Projetos</em></h2>
+    </div>
+    <div class="filters">
+      <button class="filter on" onclick="filterPort('todos',this)">Todos</button>
+      <button class="filter" onclick="filterPort('residencial',this)">Residencial</button>
+      <button class="filter" onclick="filterPort('comercial',this)">Comercial</button>
+      <button class="filter" onclick="filterPort('corporativo',this)">Corporativo</button>
+    </div>
+  </div>
+
+  <!--
+  ══════════════════════════════════════════════════════
+  COMO ADICIONAR SUAS FOTOS E ATIVAR O TOUR 360°
+
+  FOTOS NORMAIS:
+    1. Crie a pasta /img/ ao lado do index.html
+    2. Coloque as fotos dos projetos dentro dela
+    3. Substitua <div class="port-ph">...</div> por:
+       <img src="./img/nome-do-arquivo.jpg" alt="Nome">
+
+  TOUR 360°:
+    1. Renderize o ambiente como imagem equiretangular (.jpg)
+    2. Salve em /img/360/
+    3. Adicione o caminho no objeto PROJETOS no <script>
+       ex: img360: './img/360/residencia-jardins.jpg'
+    4. Adicione a classe "has-360" ao .port-item para
+       mostrar o badge 360° mesmo sem hover
+
+  ══════════════════════════════════════════════════════
+  -->
+
+  <div class="port-grid rv" id="portGrid" style="transition-delay:.1s">
+
+    <!-- Projeto com 360° — classe "has-360" deixa badge visível -->
+    <div class="port-item has-360" data-id="residencia-jardins" data-cat="residencial" data-name="Residência Jardins" data-loc="São Paulo, SP">
+      <div class="port-ph"><div class="port-ph-inner"><span class="port-ph-icon">⌂</span><span class="port-ph-lbl">Adicionar foto</span></div></div>
+      <div class="badge-360"><span class="badge-360-dot"></span>360°</div>
+      <div class="port-overlay"><div class="port-cat">Residencial</div><div class="port-name">Residência Jardins</div><div class="port-loc">São Paulo, SP</div></div>
+    </div>
+
+    <div class="port-item tall" data-id="loft-industrial" data-cat="residencial" data-name="Loft Industrial" data-loc="São Paulo, SP">
+      <div class="port-ph" style="padding-top:140%"><div class="port-ph-inner"><span class="port-ph-icon">⊞</span><span class="port-ph-lbl">Adicionar foto</span></div></div>
+      <div class="port-overlay"><div class="port-cat">Residencial</div><div class="port-name">Loft Industrial</div><div class="port-loc">São Paulo, SP</div></div>
+    </div>
+
+    <div class="port-item" data-id="cafe-conceito" data-cat="comercial" data-name="Café Conceito" data-loc="São Paulo, SP">
+      <div class="port-ph"><div class="port-ph-inner"><span class="port-ph-icon">◇</span><span class="port-ph-lbl">Adicionar foto</span></div></div>
+      <div class="port-overlay"><div class="port-cat">Comercial</div><div class="port-name">Café Conceito</div><div class="port-loc">São Paulo, SP</div></div>
+    </div>
+
+    <div class="port-item has-360" data-id="escritorio-minimalista" data-cat="corporativo" data-name="Escritório Minimalista" data-loc="São Paulo, SP">
+      <div class="port-ph"><div class="port-ph-inner"><span class="port-ph-icon">◈</span><span class="port-ph-lbl">Adicionar foto</span></div></div>
+      <div class="badge-360"><span class="badge-360-dot"></span>360°</div>
+      <div class="port-overlay"><div class="port-cat">Corporativo</div><div class="port-name">Escritório Minimalista</div><div class="port-loc">São Paulo, SP</div></div>
+    </div>
+
+    <div class="port-item" data-id="apartamento-pinheiros" data-cat="residencial" data-name="Apartamento Pinheiros" data-loc="São Paulo, SP">
+      <div class="port-ph"><div class="port-ph-inner"><span class="port-ph-icon">△</span><span class="port-ph-lbl">Adicionar foto</span></div></div>
+      <div class="port-overlay"><div class="port-cat">Residencial</div><div class="port-name">Apartamento Pinheiros</div><div class="port-loc">São Paulo, SP</div></div>
+    </div>
+
+    <div class="port-item tall" data-id="studio-comercial" data-cat="comercial" data-name="Studio Comercial" data-loc="Campinas, SP">
+      <div class="port-ph" style="padding-top:140%"><div class="port-ph-inner"><span class="port-ph-icon">◻</span><span class="port-ph-lbl">Adicionar foto</span></div></div>
+      <div class="port-overlay"><div class="port-cat">Comercial</div><div class="port-name">Studio Comercial</div><div class="port-loc">Campinas, SP</div></div>
+    </div>
+
+    <div class="port-item" data-id="casa-campo" data-cat="residencial" data-name="Casa de Campo" data-loc="Campos do Jordão, SP">
+      <div class="port-ph"><div class="port-ph-inner"><span class="port-ph-icon">▢</span><span class="port-ph-lbl">Adicionar foto</span></div></div>
+      <div class="port-overlay"><div class="port-cat">Residencial</div><div class="port-name">Casa de Campo</div><div class="port-loc">Campos do Jordão, SP</div></div>
+    </div>
+
+    <div class="port-item" data-id="coworking-vila-madalena" data-cat="corporativo" data-name="Coworking Vila Madalena" data-loc="São Paulo, SP">
+      <div class="port-ph"><div class="port-ph-inner"><span class="port-ph-icon">⊕</span><span class="port-ph-lbl">Adicionar foto</span></div></div>
+      <div class="port-overlay"><div class="port-cat">Corporativo</div><div class="port-name">Coworking Vila Madalena</div><div class="port-loc">São Paulo, SP</div></div>
+    </div>
+
+    <div class="port-item" data-id="cobertura-higienopolis" data-cat="residencial" data-name="Cobertura Higienópolis" data-loc="São Paulo, SP">
+      <div class="port-ph"><div class="port-ph-inner"><span class="port-ph-icon">⬡</span><span class="port-ph-lbl">Adicionar foto</span></div></div>
+      <div class="port-overlay"><div class="port-cat">Residencial</div><div class="port-name">Cobertura Higienópolis</div><div class="port-loc">São Paulo, SP</div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- BAND -->
+<div class="band rv">
+  <div>
+    <h3>Atendemos o <em>Brasil todo</em>.</h3>
+    <p>Não é de São Paulo? Sem problema — trabalhamos online com a mesma qualidade.</p>
+  </div>
+  <a href="#contato" class="btn-primary">Começar meu projeto</a>
+</div>
+
+<!-- MÍDIA -->
+<section id="midia">
+  <div class="rv">
+    <div class="label"><div class="label-line"></div><span>Na Mídia</span></div>
+    <h2>Studiotriz <em>em destaque</em></h2>
+  </div>
+  <div class="midia-grid rv" style="transition-delay:.1s">
+    <div class="midia-card">
+      <div class="midia-src">Revista Arquitetura & Interiores</div>
+      <div class="midia-title">Os studios que estão reinventando o design paulistano</div>
+      <p class="midia-body">Matéria especial sobre studios emergentes com visão contemporânea e identidade forte no mercado.</p>
+      <a href="#" class="midia-link">Leia a matéria →</a>
+    </div>
+    <div class="midia-card">
+      <div class="midia-src">Casa & Jardim Digital</div>
+      <div class="midia-title">Tour pelo loft que mistura industrial e orgânico em SP</div>
+      <p class="midia-body">Projeto em destaque pela integração entre materiais naturais e estrutura metálica exposta.</p>
+      <a href="#" class="midia-link">Leia a matéria →</a>
+    </div>
+    <div class="midia-card">
+      <div class="midia-src">Dezeen Brasil</div>
+      <div class="midia-title">Tour virtual 360°: a nova forma de apresentar arquitetura</div>
+      <p class="midia-body">Como studios brasileiros usam renderização imersiva para transformar a experiência do cliente.</p>
+      <a href="#" class="midia-link">Leia a matéria →</a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTATO -->
+<section id="contato">
+  <div class="cont-wrap">
+    <div class="cont-left rv">
+      <div class="label"><div class="label-line"></div><span>Contato</span></div>
+      <h2>Vamos criar<br><em>juntos</em>?</h2>
+      <p>Tem um projeto em mente? Entre em contato e vamos transformar seu espaço em algo extraordinário.</p>
+      <div class="cont-channels">
+        <a href="https://wa.me/5511999999999" target="_blank" class="cont-ch">
+          <div class="cont-ch-icon"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
+          <div><span class="cont-ch-label">WhatsApp</span><span class="cont-ch-val">(11) 9 9999-9999</span></div>
+          <span class="cont-ch-arr">→</span>
+        </a>
+        <a href="https://instagram.com/studiotriz" target="_blank" class="cont-ch">
+          <div class="cont-ch-icon"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></div>
+          <div><span class="cont-ch-label">Instagram</span><span class="cont-ch-val">@studiotriz</span></div>
+          <span class="cont-ch-arr">→</span>
+        </a>
+        <a href="mailto:contato@studiotriz.com" class="cont-ch">
+          <div class="cont-ch-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+          <div><span class="cont-ch-label">E-mail</span><span class="cont-ch-val">contato@studiotriz.com</span></div>
+          <span class="cont-ch-arr">→</span>
+        </a>
+      </div>
+    </div>
+    <div class="cont-form rv" style="transition-delay:.12s">
+      <p class="cf-heading">Envie uma mensagem</p>
+      <form onsubmit="sendForm(event)">
+        <div class="fg-row">
+          <div class="fg"><label>Nome</label><input type="text" placeholder="Seu nome" required></div>
+          <div class="fg"><label>Sobrenome</label><input type="text" placeholder="Sobrenome"></div>
+        </div>
+        <div class="fg"><label>E-mail</label><input type="email" placeholder="seu@email.com" required></div>
+        <div class="fg">
+          <label>Tipo de projeto</label>
+          <select>
+            <option value="">Selecione o serviço</option>
+            <option>Projeto Básico</option>
+            <option>Projeto Completo</option>
+            <option>Consultoria Online</option>
+            <option>Residencial — até 50m²</option>
+            <option>Residencial — 50m² a 80m²</option>
+            <option>Residencial — acima de 80m²</option>
+            <option>Comercial</option>
+            <option>Corporativo</option>
+          </select>
+        </div>
+        <div class="fg"><label>Mensagem</label><textarea placeholder="Conte sobre seu projeto, localização, prazo..."></textarea></div>
+        <button type="submit" class="cf-submit">Enviar Mensagem</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#inicio" class="logo">
+    <div class="logo-mark"><span>T</span></div>
+    <span class="logo-name">Studiotriz</span>
+  </a>
+  <span class="f-copy">© 2024 Studiotriz · Todos os direitos reservados.</span>
+  <div class="f-socials">
+    <a href="https://instagram.com/studiotriz" target="_blank" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+    <a href="https://wa.me/5511999999999" target="_blank" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+  </div>
+</footer>
+
+<!-- ── LIGHTBOX (fotos normais) ── -->
+<div id="lb">
+  <button class="lb-close" onclick="closeLb()">✕</button>
+  <div class="lb-nav">
+    <button class="lb-prev" onclick="navLb(-1)">‹</button>
+    <button class="lb-next" onclick="navLb(1)">›</button>
+  </div>
+  <div class="lb-content" id="lbContent"></div>
+  <div class="lb-meta">
+    <span class="lb-meta-cat" id="lbCat"></span>
+    <span class="lb-meta-name" id="lbName"></span>
+  </div>
+  <!-- botão que aparece se o projeto tiver 360° -->
+  <button class="lb-360-btn" id="lb360Btn" onclick="openFrom360()">
+    <span class="lb-360-dot"></span> Ver Tour 360°
+  </button>
+</div>
+
+<!-- ── MODAL 360° ── -->
+<div id="modal360">
+  <div class="m360-head">
+    <div>
+      <div class="m360-title" id="m360Title">Projeto</div>
+      <div class="m360-sub" id="m360Sub">Tour Virtual 360°</div>
+    </div>
+    <button class="m360-close" onclick="close360()">✕</button>
+  </div>
+  <div id="pnlViewer"></div>
+  <div class="m360-hint">Arraste para explorar · Scroll para zoom</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+<script>
+// ══════════════════════════════════════════════════════
+// DADOS DOS PROJETOS
+// Preencha img e img360 quando tiver os arquivos prontos.
+// img    = foto normal (lightbox)
+// img360 = panorama equiretangular (tour 360°)
+// ══════════════════════════════════════════════════════
+const PROJETOS = {
+  'residencia-jardins':    { img: null, img360: null /* './img/360/residencia-jardins.jpg' */ },
+  'loft-industrial':       { img: null, img360: null },
+  'cafe-conceito':         { img: null, img360: null },
+  'escritorio-minimalista':{ img: null, img360: null /* './img/360/escritorio-min.jpg' */ },
+  'apartamento-pinheiros': { img: null, img360: null },
+  'studio-comercial':      { img: null, img360: null },
+  'casa-campo':            { img: null, img360: null },
+  'coworking-vila-madalena':{ img: null, img360: null },
+  'cobertura-higienopolis':{ img: null, img360: null },
+};
+
+// ── CURSOR ──
+const c1 = document.getElementById('c1'), c2 = document.getElementById('c2');
+let mx = 0, my = 0, fx = 0, fy = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  c1.style.transform = `translate(${mx}px,${my}px) translate(-50%,-50%)`;
+});
+(function loop(){ fx+=(mx-fx)*.1; fy+=(my-fy)*.1; c2.style.transform=`translate(${fx}px,${fy}px) translate(-50%,-50%)`; requestAnimationFrame(loop); })();
+
+// ── NAV ──
+window.addEventListener('scroll', () =>
+  document.getElementById('nav').classList.toggle('stuck', scrollY > 60)
+);
+
+// ── TICKER ──
+const words = ['Design de Interiores','Tour 360°','Renderização 3D','Projetos Residenciais','Projetos Comerciais','Arquitetura Contemporânea','Consultoria Online','São Paulo & Brasil'];
+const tel = document.getElementById('ticker');
+const th = [...words,...words,...words,...words].map(w=>`<span class="ticker-item"><span class="ticker-dot"></span>${w}</span>`).join('');
+tel.innerHTML = th + th;
+
+// ── REVEAL ──
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) e.target.classList.add('in');
+}), { threshold: .07 });
+document.querySelectorAll('.rv, .rv-l').forEach(el => io.observe(el));
+
+// ── PORTFOLIO: clique em item ──
+document.querySelectorAll('.port-item').forEach(item => {
+  item.addEventListener('click', () => openLb(item));
+});
+
+// ── FILTER ──
+function filterPort(cat, btn) {
+  document.querySelectorAll('.filter').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.port-item').forEach(it => {
+    it.style.display = (cat === 'todos' || it.dataset.cat === cat) ? '' : 'none';
+  });
+}
+
+// ── LIGHTBOX ──
+let lbItems = [], lbIdx = 0, lbCurrentId = null;
+
+function openLb(el) {
+  lbItems = [...document.querySelectorAll('.port-item:not([style*="display: none"])')];
+  lbIdx = lbItems.indexOf(el);
+  renderLb();
+  document.getElementById('lb').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderLb() {
+  const item = lbItems[lbIdx];
+  const id   = item.dataset.id;
+  const name = item.dataset.name;
+  const cat  = item.dataset.cat;
+  const loc  = item.dataset.loc;
+  lbCurrentId = id;
+
+  document.getElementById('lbCat').textContent  = cat.charAt(0).toUpperCase()+cat.slice(1)+' · '+loc;
+  document.getElementById('lbName').textContent = name;
+
+  const proj = PROJETOS[id] || {};
+  const cont = document.getElementById('lbContent');
+
+  if (proj.img) {
+    cont.innerHTML = `<img src="${proj.img}" alt="${name}">`;
+  } else {
+    const icon = item.querySelector('.port-ph-icon').textContent;
+    cont.innerHTML = `<div class="lb-ph"><div class="lb-ph-icon">${icon}</div><div class="lb-ph-title">${name}</div><div class="lb-ph-sub">${cat} · ${loc}</div></div>`;
+  }
+
+  // Mostrar botão 360° se o projeto tiver imagem panorâmica
+  const btn360 = document.getElementById('lb360Btn');
+  if (proj.img360) {
+    btn360.classList.add('show');
+  } else if (item.classList.contains('has-360')) {
+    // ainda sem imagem mas marcado como 360 — mostra botão desabilitado com hint
+    btn360.classList.add('show');
+    btn360.style.opacity = '.5';
+    btn360.title = 'Imagem 360° em breve';
+  } else {
+    btn360.classList.remove('show');
+    btn360.style.opacity = '';
+    btn360.title = '';
+  }
+}
+
+function navLb(dir) {
+  lbIdx = (lbIdx + dir + lbItems.length) % lbItems.length;
+  renderLb();
+}
+
+function closeLb() {
+  document.getElementById('lb').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Abre o 360 a partir do botão dentro do lightbox
+function openFrom360() {
+  const item = lbItems[lbIdx];
+  closeLb();
+  open360(item);
+}
+
+// ── 360° MODAL ──
+let pViewer = null;
+
+function open360(el) {
+  const id   = el.dataset.id;
+  const name = el.dataset.name;
+  const cat  = el.dataset.cat || '';
+  const loc  = el.dataset.loc || '';
+  const proj = PROJETOS[id] || {};
+
+  document.getElementById('m360Title').textContent = name;
+  document.getElementById('m360Sub').textContent   = (cat ? cat.charAt(0).toUpperCase()+cat.slice(1)+' · ' : '') + loc;
+
+  document.getElementById('modal360').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  const viewer = document.getElementById('pnlViewer');
+  viewer.innerHTML = '';
+
+  if (proj.img360) {
+    pViewer = pannellum.viewer('pnlViewer', {
+      type:              'equirectangular',
+      panorama:          proj.img360,
+      autoLoad:          true,
+      autoRotate:        -1,
+      compass:           false,
+      showZoomCtrl:      true,
+      showFullscreenCtrl: false,
+      mouseZoom:         true,
+      hfov:              100,
+    });
+  } else {
+    // placeholder quando a imagem ainda não foi adicionada
+    viewer.innerHTML = `
+      <div class="ph360">
+        <div class="ph360-icon">◎</div>
+        <div class="ph360-title">${name}</div>
+        <p class="ph360-desc">
+          Para ativar o tour 360° deste projeto, adicione a imagem panorâmica
+          na variável <strong style="color:var(--gold)">PROJETOS</strong> no final do <strong style="color:var(--gold)">index.html</strong>.
+        </p>
+        <div class="ph360-steps">
+          <div class="ph360-step"><span class="ph360-sn">1</span><span class="ph360-sl">Renderize 360°</span></div>
+          <div class="ph360-step"><span class="ph360-sn">2</span><span class="ph360-sl">Exporte equiretangular</span></div>
+          <div class="ph360-step"><span class="ph360-sn">3</span><span class="ph360-sl">Adicione no código</span></div>
+        </div>
+        <div class="ph360-code">img360: './img/360/${id}.jpg'</div>
+      </div>`;
+  }
+}
+
+function close360() {
+  document.getElementById('modal360').classList.remove('open');
+  document.body.style.overflow = '';
+  if (pViewer) { pViewer.destroy(); pViewer = null; }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeLb(); close360(); }
+  if (document.getElementById('lb').classList.contains('open')) {
+    if (e.key === 'ArrowLeft')  navLb(-1);
+    if (e.key === 'ArrowRight') navLb(1);
+  }
+});
+
+// ── FORM ──
+function sendForm(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('.cf-submit');
+  btn.textContent = 'Mensagem enviada ✓';
+  btn.style.background = '#2d5e42';
+  btn.style.color = '#fff';
+  setTimeout(() => {
+    btn.textContent = 'Enviar Mensagem';
+    btn.style.background = '';
+    btn.style.color = '';
+    e.target.reset();
+  }, 3500);
+}
+</script>
+</body>
+</html>
